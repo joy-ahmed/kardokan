@@ -19,6 +19,7 @@ This is a fullstack ecommerce store that allows users to browse and purchase pro
 ## Folder Structure
 
 ecommerce-store/
+
 ├── frontend/
 ├── backend/
 │ ├── src/
