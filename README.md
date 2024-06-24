@@ -48,7 +48,7 @@ ecommerce-store/
 2. Install dependencies:
 
    ```bash
-   npm install
+   bun install
    ```
 
 3. Set up your environment variables. Create a `.env` file in the backend directory and add the following:
@@ -60,13 +60,13 @@ ecommerce-store/
 4. Run database migrations (if using Prisma):
 
    ```bash
-   npx prisma migrate dev
+   bunx prisma migrate dev
    ```
 
 5. Start the backend server:
 
    ```bash
-   npm run dev
+   bun run dev
    ```
 
 ### Frontend Setup
@@ -80,13 +80,13 @@ ecommerce-store/
 2. Install dependencies:
 
    ```bash
-   npm install
+   bun install
    ```
 
 3. Start the frontend development server:
 
    ```bash
-   npm run dev
+   bun run dev
    ```
 
 ## Usage
@@ -97,14 +97,14 @@ ecommerce-store/
 
    ```bash
    cd backend
-   npm run dev
+   bun run dev
    ```
 
 2. Start the frontend server (if not already running):
 
    ```bash
    cd frontend
-   npm run dev
+   bun run dev
    ```
 
 3. Open your browser and navigate to `http://localhost:3000` to see the frontend in action.
@@ -128,9 +128,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 For any questions or suggestions, feel free to reach out:
 
-- **Name**: Your Name
-- **Email**: your.email@example.com
-- **GitHub**: [Your GitHub Profile](https://github.com/joy-ahmed)
+- **Name**: Joy Ahmed
+- **Email**: dev.joyahmed@gmail.com | hello.joyahmed@gmail.com
+- **GitHub**: [Joy Ahmed](https://github.com/joy-ahmed)
 
 ---
 
