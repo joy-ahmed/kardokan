@@ -20,6 +20,7 @@ This is a fullstack ecommerce store that allows users to browse and purchase pro
 
 ecommerce-store/
 
+```bash
  .
     ├── ...
     ├── backend                 # backend files (alternatively `backend`)
@@ -33,6 +34,7 @@ ecommerce-store/
     │   ├── .env
     │   └── ...                 # etc.
     └── ...
+```
 
 ## Installation
 
