@@ -20,15 +20,19 @@ This is a fullstack ecommerce store that allows users to browse and purchase pro
 
 ecommerce-store/
 
-├── frontend/
-├── backend/
+.
+├── ...
+├── backend # backend files (alternatively `backend`)
 │ ├── src/
 │ │ ├── controllers/
 │ │ ├── routes/
 │ │ ├── services/
 │ │ ├── utils/
-├── prisma/
-├── .env
+│ ├── prisma/
+│ │ ├── schema.prisma
+│ ├── .env
+│ └── ... # etc.
+└── ...
 
 ## Installation
 
