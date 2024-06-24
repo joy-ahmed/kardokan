@@ -1,41 +1,76 @@
 import type { Request, Response } from "express";
 import prisma from "../../prisma/db";
-import { Prisma } from "@prisma/client";
-
-type ProductSchema = Prisma.ProductCreateInput;
-type VariantSchema = Prisma.VariantCreateInput;
-type CategorySchema = Prisma.CategoryCreateInput;
-type CatalogSchema = Prisma.CatalogCreateInput;
+import type { ProductSchema } from "../services/types";
 
 // @desc    Get all products
 // @route   GET /api/products
-export const getProducts = (req: Request, res: Response) => {
-  res.json({ message: "all products" });
+export const getProducts = async (req: Request, res: Response) => {
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        variants: {
+          include: {
+            images: true,
+          },
+        },
+        images: true,
+      },
+    });
+    res.json(products);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 // @desc    Get a single product
 // @route   GET /api/products/:id
-export const getProduct = (req: Request, res: Response) => {
-  res.json({ message: "single product" });
+export const getProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        variants: {
+          include: {
+            images: true,
+          },
+        },
+        images: true,
+      },
+    });
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    res.json(product);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 // @desc    Create a product
 // @route   POST /api/products
-export const createProduct = async (
-  req: Request<ProductSchema>,
-  res: Response
-) => {
+export const createProduct = async (req: Request, res: Response) => {
   const {
     title,
     description,
+    inStock,
     price,
-    available,
-    style,
-    images,
+    discount,
+    categoryId,
+    catalogue,
     variants,
-    categories,
-    catalogs,
-  } = req.body;
+    images,
+  } = req.body as ProductSchema;
 
   try {
     // Generate slug
@@ -47,72 +82,150 @@ export const createProduct = async (
     if (existingProduct) {
       slug = `${slug}-${Date.now()}`;
     }
+
     // Create product
     const product = await prisma.product.create({
       data: {
         title,
         slug,
         description,
+        inStock,
         price,
-        available,
-        style,
-        images: {
-          create: images,
-        },
+        discount,
+        catalogue,
         categories: {
-          create: categories?.map((cat: CategorySchema) => ({
-            Category: {
-              connectOrCreate: {
-                where: { name: cat.name },
-                create: {
-                  name: cat.name,
-                  description: cat.description || "",
-                },
-              },
+          create: {
+            category: {
+              connect: { id: categoryId },
             },
-          })),
+          },
         },
         variants: variants
           ? {
-              create: variants.map((variant: VariantSchema) => ({
-                name: variant.name,
-                price: variant.price,
-                available: variant.available,
+              create: variants.map((variant) => ({
+                variantName: variant.variantName,
+                variantValue: variant.variantValue,
+                variantPrice: variant.variantPrice,
+                variantInStock: variant.variantInStock,
                 images: {
-                  create: variant.images,
+                  create: variant.images.map((image) => ({
+                    type: image.type,
+                    url: image.url,
+                  })),
                 },
               })),
             }
           : undefined,
-        catalogs: {
-          create: catalogs?.map((catalog: CatalogSchema) => ({
-            Catalog: {
-              connectOrCreate: {
-                where: { name: catalog.name },
-                create: { name: catalog.name },
-              },
-            },
+        images: {
+          create: images.map((image) => ({
+            type: image.type,
+            url: image.url,
           })),
-        },
-      },
-      include: {
-        variants: true,
-        categories: {
-          include: {
-            Category: true,
-          },
-        },
-        catalogs: {
-          include: {
-            Catalog: true,
-          },
         },
       },
     });
 
-    res.status(201).json({ message: "Product created", product });
+    res.status(201).json({ success: "Product created successfully", product });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
-    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/// @desc    Update product
+// @route   PUT /api/products/:id
+export const updateProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const {
+    title,
+    description,
+    inStock,
+    price,
+    discount,
+    categoryId,
+    catalogue,
+    variants,
+    images,
+  } = req.body as ProductSchema;
+
+  try {
+    // Generate slug if title is changed
+    let slug = title.toLowerCase().replace(/\s/g, "-");
+    const existingProduct = await prisma.product.findUnique({
+      where: { slug },
+    });
+    if (existingProduct && existingProduct.id !== id) {
+      slug = `${slug}-${Date.now()}`;
+    }
+
+    const updatedProductData: any = {
+      title,
+      slug,
+      description,
+      inStock,
+      price,
+      discount,
+      catalogue,
+      categories: {
+        deleteMany: {}, // Clear existing relations
+        create: {
+          category: {
+            connect: { id: categoryId },
+          },
+        },
+      },
+    };
+
+    if (variants) {
+      updatedProductData.variants = {
+        deleteMany: {}, // Clear existing variants
+        create: variants.map((variant) => ({
+          variantName: variant.variantName,
+          variantValue: variant.variantValue,
+          variantPrice: variant.variantPrice,
+          variantInStock: variant.variantInStock,
+          images: {
+            create: variant.images.map((image) => ({
+              type: image.type,
+              url: image.url,
+            })),
+          },
+        })),
+      };
+    }
+
+    if (images) {
+      updatedProductData.images = {
+        deleteMany: {}, // Clear existing images
+        create: images.map((image) => ({
+          type: image.type,
+          url: image.url,
+        })),
+      };
+    }
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: updatedProductData,
+    });
+
+    res.json({ success: "Product updated successfully", product });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// @desc    delete a product
+// @route   POST /api/products/:id
+
+export const deleteProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    await prisma.product.delete({
+      where: { id },
+    });
+    res.json({ message: "Product deleted successfully" });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 };
