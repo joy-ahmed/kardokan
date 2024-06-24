@@ -7,67 +7,124 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// model Product {
+//   id           String              @id @default(cuid())
+//   title        String
+//   slug         String              @unique
+//   description  String
+//   price        Float
+//   available    Int
+//   style        String
+//   images       Image[]
+//   variants     ProductVariants[]
+//   categories   ProductCategory[]
+//   catalogs     ProductCatalog[]
+// }
+
+// model Image {
+//   id        String   @id @default(cuid())
+//   url       String
+//   type      String
+//   productId String
+//   product   Product  @relation(fields: [productId], references: [id])
+//   variantId String?
+//   variant   Variant? @relation(fields: [variantId], references: [id])
+// }
+
+// model Category {
+//   id                String              @id @default(cuid())
+//   name              String              @unique
+//   description       String
+//   products          ProductCategory[]
+// }
+
+// model Variant {
+//   id        String   @id @default(cuid())
+//   name      String
+//   price     Float
+//   productId String
+//   available Int
+//   product   ProductVariants[]
+//   images    Image[]
+// }
+
+// model Catalog {
+//   id        String              @id @default(cuid())
+//   name      String              @unique
+//   products  ProductCatalog[]
+// }
+
+// model ProductCategory {
+//   productId  String
+//   categoryId String
+//   Product    Product  @relation(fields: [productId], references: [id])
+//   Category   Category @relation(fields: [categoryId], references: [id])
+
+//   @@id([productId, categoryId])
+// }
+
+// model ProductCatalog {
+//   productId String
+//   catalogId String
+//   Product   Product @relation(fields: [productId], references: [id])
+//   Catalog   Catalog @relation(fields: [catalogId], references: [id])
+
+//   @@id([productId, catalogId])
+// }
+
+// model ProductVariants {
+//   productId String
+//   variantId String
+//   Product Product @relation(fields: [productId], references: [id])
+//   Variant Variant @relation(fields: [variantId], references: [id])
+//   @@id([productId, variantId])
+// }
+
 model Product {
-  id           String              @id @default(cuid())
-  title        String
-  slug         String              @unique
-  description  String
-  price        Float
-  available    Int
-  style        String
-  images       Image[]
-  variants     Variant[]
-  categories   ProductCategory[]
-  catalogs     ProductCatalog[]
-}
-
-model Image {
-  id        String   @id @default(cuid())
-  url       String
-  type      String
-  productId String
-  product   Product  @relation(fields: [productId], references: [id])
-  variantId String?
-  variant   Variant? @relation(fields: [variantId], references: [id])
-}
-
-model Category {
-  id                String              @id @default(cuid())
-  name              String              @unique
-  description       String
-  products          ProductCategory[]
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  description String
+  inStock     Int
+  price       Float
+  discount    Float?
+  categories  ProductCategory[]
+  catalogue   String
+  variants    Variant[]
+  images      Image[]    @relation("ProductImages")
 }
 
 model Variant {
-  id        String   @id @default(cuid())
-  name      String
-  price     Float
-  productId String
-  available Int
-  product   Product @relation(fields: [productId], references: [id])
-  images    Image[]
+  id            String     @id @default(cuid())
+  variantName   String
+  variantValue  String
+  variantPrice  Float
+  variantInStock Int
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  images        Image[]     @relation("VariantImages")
 }
 
-model Catalog {
-  id        String              @id @default(cuid())
-  name      String              @unique
-  products  ProductCatalog[]
+model Category {
+  id       String           @id @default(cuid())
+  name     String           @unique
+  products ProductCategory[]
 }
 
 model ProductCategory {
   productId  String
+  product    Product         @relation(fields: [productId], references: [id])
   categoryId String
-  Product    Product  @relation(fields: [productId], references: [id])
-  Category   Category @relation(fields: [categoryId], references: [id])
-
+  category   Category        @relation(fields: [categoryId], references: [id])
   @@id([productId, categoryId])
 }
 
-model ProductCatalog {
-  productId String
-  catalogId String
-  Product   Product @relation(fields: [productId], references: [id])
-  Catalog   Catalog @relation(fields: [catalogId], references: [id])
-
-  @@id([productId, catalogId])
+model Image {
+  id         String     @id @default(cuid())
+  type       String
+  url        String
+  productId  String?
+  variantId  String?
+  product    Product?   @relation("ProductImages", fields: [productId], references: [id])
+  variant    Variant?   @relation("VariantImages", fields: [variantId], references: [id])
 }
