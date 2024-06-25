@@ -1,6 +1,7 @@
 import express from "express";
 import productRouter from "./routes/productRouter";
 import categoryRouter from "./routes/categoryRouter";
+import cors from "cors";
 // import bodyParser from 'body-parser'
 
 const app = express();
@@ -9,6 +10,11 @@ const PORT = process.env.PORT || 9000;
 app.use(express.json());
 // app.use(bodyParser.json())
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
 
 app.use("/api/products", productRouter);
 app.use("/api/categories", categoryRouter);
