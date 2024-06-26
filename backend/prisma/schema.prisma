@@ -80,6 +80,35 @@ datasource db {
 //   @@id([productId, variantId])
 // }
 
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  password String
+  role  Role  @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+  session Session[]
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+model Session {
+  id  String  @id @default(cuid())
+  sid String  @unique
+  data  Json
+  expireAt  DateTime
+  createAt  DateTime  @default(now())
+  updateAt  DateTime @updatedAt
+  userId  String
+  user  User  @relation(fields: [userId], references: [id])
+}
+
 model Product {
   id          String     @id @default(cuid())
   title       String
