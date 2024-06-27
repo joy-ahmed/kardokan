@@ -9,7 +9,7 @@ export const register = async (req: Request, res: Response) => {
   try {
     const userExists = await prisma.user.findUnique({ where: { email } });
     if (userExists) {
-      return res.status(400).json({ error: "User already exists" });
+      return res.status(400).json({ message: "User already exists" });
     }
     const hashPassword = await bcrypt.hash(password, 10);
     const user: User = await prisma.user.create({
@@ -17,21 +17,21 @@ export const register = async (req: Request, res: Response) => {
     });
     res.status(201).json({ success: "User created successfully!", user });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 export const login = (req: Request, res: Response, next: Function) => {
   passport.authenticate("local", (err: Error, user: User, info: any) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ message: err.message });
     }
     if (!user) {
-      return res.status(401).json({ error: info.message });
+      return res.status(401).json({ message: info.message });
     }
     req.logIn(user, (err) => {
       if (err) {
-        return res.status(500).json({ error: err.message });
+        return res.status(500).json({ message: err.message });
       }
       return res.json({ success: "User logged in successfully", user });
     });
@@ -41,7 +41,7 @@ export const login = (req: Request, res: Response, next: Function) => {
 export const logout = (req: Request, res: Response) => {
   req.logout((err) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ message: err.message });
     }
     res.json({ success: "User logged out successfully" });
   });
@@ -51,6 +51,6 @@ export const getDashboard = (req: Request, res: Response) => {
   if (req.isAuthenticated()) {
     res.json({ user: req.user });
   } else {
-    res.status(401).json({ error: "User not authenticated" });
+    res.status(401).json({ message: "User not authenticated" });
   }
 };
