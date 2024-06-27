@@ -2,6 +2,9 @@ import express from "express";
 import productRouter from "./routes/productRouter";
 import categoryRouter from "./routes/categoryRouter";
 import cors from "cors";
+import session from "express-session";
+import passport from "./config/passportConfig";
+import authRoutes from "./routes/authRoutes";
 // import bodyParser from 'body-parser'
 
 const app = express();
@@ -16,12 +19,21 @@ app.use(
   })
 );
 
+app.use(
+  session({
+    secret: process.env.PASSPORT_SECRET!,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use("/api/products", productRouter);
 app.use("/api/categories", categoryRouter);
-
-app.get("/", (req, res) => {
-  res.json({ message: "Hello World" });
-});
+app.use("/api/auth", authRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on: http://localhost:${PORT}`);
