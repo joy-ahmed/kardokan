@@ -1,0 +1,11 @@
+import { create } from "zustand";
+
+interface UserState {
+  user: { email: string } | null;
+  setUser: (user: { email: string } | null) => void;
+}
+
+export const useUserStore = create<UserState>((set) => ({
+  user: null,
+  setUser: (user) => set({ user }),
+}));

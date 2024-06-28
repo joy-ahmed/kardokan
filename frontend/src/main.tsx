@@ -7,21 +7,28 @@ import App from "./App.tsx";
 import "./index.css";
 import SignUpPage from "./pages/auth/signup/index.tsx";
 import LoginPage from "./pages/auth/login/index.tsx";
+import Layout from "./components/Layout.tsx";
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
-  },
-  {
-    path: "/signup",
-    element: <SignUpPage />,
-  },
-  {
-    path: "/login",
-    element: <LoginPage />,
+    element: <Layout />,
+    children: [
+      {
+        path: "/",
+        element: <App />,
+      },
+      {
+        path: "/signup",
+        element: <SignUpPage />,
+      },
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
+    ],
   },
 ]);
 
